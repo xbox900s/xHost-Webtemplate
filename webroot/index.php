@@ -190,7 +190,7 @@ $webroot = $_SERVER['DOCUMENT_ROOT'];
     <div class="path-info">📁 <?= $t['upload_info'] ?></div>
 
     <div class="footer">
-        <p>&copy; 2025 xHost · <?= $t['powered_by'] ?> <a href="https://sigmaprods.dev" target="_blank">@sigmaprods</a></p>
+        <p>&copy; 2025 xHost · <?= $t['powered_by'] ?> <a href="https://discord.gg/7k2VXQG7YD" target="_blank">xHost</a></p>
     </div>
 </div>
 
