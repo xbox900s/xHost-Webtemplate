@@ -1,217 +1,94 @@
 <?php
-session_start();
+// xHost Geblockte Website Template
+// Design: Dunkelblau, modern, clean
 
-// === Sprachumschaltung ===
-$lang = $_GET['lang'] ?? $_SESSION['lang'] ?? 'de';
-$_SESSION['lang'] = $lang;
+$server_ip = $_SERVER['SERVER_ADDR'] ?? 'Unbekannt';
+$server_port = $_SERVER['SERVER_PORT'] ?? 'Unbekannt';
+$reason = isset($_GET['reason']) ? htmlspecialchars($_GET['reason']) : 'Nicht aufgesetzt';
 
-// === Texte ===
-$texts = [
-    'de' => [
-        'title' => 'xHost Server Status',
-        'php_version' => 'Aktuelle PHP-Version',
-        'server_running' => 'Dein Webserver läuft korrekt!',
-        'upload_info' => 'Lade deine Website-Dateien in den "webroot"-Ordner hoch.',
-        'current_time' => 'Server-Zeit',
-        'your_ip' => 'Deine IP-Adresse',
-        'root_path' => 'Webroot-Pfad',
-        'change_lang' => 'Sprache wechseln',
-        'toggle_mode' => 'Modus wechseln',
-        'powered_by' => 'Design von',
-    ],
-    'en' => [
-        'title' => 'xHost Server Status',
-        'php_version' => 'Current PHP Version',
-        'server_running' => 'Your web server is up and running!',
-        'upload_info' => 'Place your website files in the "webroot" folder.',
-        'current_time' => 'Server Time',
-        'your_ip' => 'Your IP Address',
-        'root_path' => 'Webroot Path',
-        'change_lang' => 'Change Language',
-        'toggle_mode' => 'Toggle Mode',
-        'powered_by' => 'Design by',
-    ]
-];
+// Exakt dein vorgegebener Mailtext (mit IP, Port und Grund eingefügt)
+$mail_body = "Ich kann auf die Seite: ({$server_ip}:{$server_port}) aus dem Grund: ({$reason}) nicht zugreifen!%0A%0A"
+    ."Ich bestätige, dass ich diese Email nicht bearbeitet habe. Unser Team wird dies prüfen!%0A%0A"
+    ."Hier unterschreiben: ";
 
-$t = $texts[$lang];
-
-// === Serverdaten ===
-$phpVersion = phpversion();
-$serverTime = date("Y-m-d H:i:s");
-$userIP = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
-$webroot = $_SERVER['DOCUMENT_ROOT'];
+$mail_link = "mailto:support@bedmine.de?subject=Zugriff%20gesperrt&body=" . $mail_body;
 ?>
-
 <!DOCTYPE html>
-<html lang="<?= $lang ?>">
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>xHost</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>xHost | Zugriff Gesperrt</title>
     <style>
-        :root {
-            --bg-light: #f4f7fc;
-            --bg-dark: #1b1c27;
-            --text-light: #2c3e50;
-            --text-dark: #ecf0f1;
-            --accent: #00bcd4;
-            --success: #4caf50;
-            --warn: #ff9800;
-            --card-light: #ffffff;
-            --card-dark: #2a2b3d;
-        }
-
-        * {
-            box-sizing: border-box;
-            transition: 0.3s ease all;
-        }
-
         body {
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1a2f, #102a4d);
+            color: #fff;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            padding: 1rem;
         }
-
-        .card {
-            background-color: var(--card-dark);
-            border-radius: 20px;
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
             padding: 40px;
-            box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+            border-radius: 15px;
+            max-width: 500px;
             text-align: center;
-            max-width: 650px;
-            width: 100%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
         }
-
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--accent);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #4da3ff;
         }
-
-        .info {
-            font-size: 1.1rem;
-            margin: 10px 0;
+        p {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
         }
-
-        .highlight {
-            background-color: var(--accent);
-            color: white;
-            padding: 10px 20px;
+        .reason {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 1.3rem;
-            margin: 15px 0;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+        a.button {
             display: inline-block;
-        }
-
-        .message {
-            color: var(--success);
-            margin-top: 15px;
-        }
-
-        .path-info {
-            color: var(--warn);
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .footer {
-            margin-top: 30px;
-            font-size: 0.95rem;
-            color: #aaa;
-        }
-
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .top-bar {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .top-bar a, .top-bar button {
-            background: var(--accent);
+            padding: 12px 25px;
+            background: #4da3ff;
             color: white;
-            border: none;
-            padding: 8px 14px;
             border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
             text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s ease;
         }
-
-        .top-bar a:hover, .top-bar button:hover {
-            background: #0097a7;
+        a.button:hover {
+            background: #1d75cc;
         }
-
-        @media (max-width: 600px) {
-            .card {
-                padding: 25px;
-            }
-            h1 {
-                font-size: 2rem;
-            }
+        footer {
+            font-size: 0.8rem;
+            margin-top: 15px;
+            color: rgba(255,255,255,0.6);
         }
     </style>
 </head>
 <body>
-
-<div class="top-bar">
-    <a href="?lang=<?= $lang === 'de' ? 'en' : 'de' ?>"><?= $t['change_lang'] ?></a>
-    <button onclick="toggleTheme()"><?= $t['toggle_mode'] ?></button>
-</div>
-
-<div class="card">
-    <h1>🌐 <?= $t['title'] ?></h1>
-
-    <div class="info"><?= $t['php_version'] ?>:</div>
-    <div class="highlight"><?= $phpVersion ?></div>
-
-    <div class="info"><?= $t['current_time'] ?>: <strong><?= $serverTime ?></strong></div>
-    <div class="info"><?= $t['your_ip'] ?>: <strong><?= $userIP ?></strong></div>
-    <div class="path-info"><?= $t['root_path'] ?>: <br><code><?= $webroot ?></code></div>
-
-    <div class="message">✅ <?= $t['server_running'] ?></div>
-    <div class="path-info">📁 <?= $t['upload_info'] ?></div>
-
-    <div class="footer">
-        <p>&copy; 2025 xHost · <?= $t['powered_by'] ?> <a href="https://discord.gg/7k2VXQG7YD" target="_blank">xHost</a></p>
+    <div class="container">
+        <h1>🚫 Zugriff Gesperrt</h1>
+        <p>Der Zugriff auf diese Website wurde von <strong>xHost</strong> blockiert.</p>
+        <div class="reason">
+            Grund: <?php echo $reason; ?>
+        </div>
+        <p>Falls du glaubst, dass dies ein Irrtum ist, kontaktiere bitte unseren Support.</p>
+        <a href="<?php echo $mail_link; ?>" class="button">Support Kontaktieren</a>
+        <footer>
+            &copy; <?php echo date('Y'); ?> xʜᴏꜱᴛ ꜱᴛᴜᴅɪᴏꜱ
+        </footer>
     </div>
-</div>
-
-<script>
-    // Dark/Light Toggle
-    function toggleTheme() {
-        const root = document.documentElement;
-        const dark = getComputedStyle(root).getPropertyValue('--bg-dark');
-        const isDark = getComputedStyle(document.body).backgroundColor === dark;
-
-        if (isDark) {
-            root.style.setProperty('--bg-dark', '#f4f7fc');
-            root.style.setProperty('--card-dark', '#ffffff');
-            root.style.setProperty('--text-dark', '#2c3e50');
-        } else {
-            root.style.setProperty('--bg-dark', '#1b1c27');
-            root.style.setProperty('--card-dark', '#2a2b3d');
-            root.style.setProperty('--text-dark', '#ecf0f1');
-        }
-    }
-</script>
-
 </body>
 </html>
