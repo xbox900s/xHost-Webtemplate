@@ -16,7 +16,7 @@ GREY="\033[38;5;245m"     # grau
 ORANGE="\033[38;5;208m"   # xHost Orange
 
 # Hostname als dynamischer ServerName
-SERVER_NAME=$(hostname)
+SERVER_NAME=Webserver
 PREFIX="${ORANGE}${BOLD}xHost@${SERVER_NAME}${RESET}"
 
 # xHost Branding Banner
