@@ -20,16 +20,23 @@ $mail_link = "mailto:support@bedmine.de?subject=Zugriff%20gesperrt&body=" . $mai
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>xHost | Zugriff Gesperrt</title>
     <style>
-        body {
-            margin: 0;
+        html, body {
+            margin: 0; padding: 0; height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0a1a2f, #102a4d);
             color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
+
+        /* Canvas Fullscreen über allem, aber unter Container */
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
         .container {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(8px);
@@ -38,17 +45,25 @@ $mail_link = "mailto:support@bedmine.de?subject=Zugriff%20gesperrt&body=" . $mai
             max-width: 500px;
             text-align: center;
             box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 1;
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
         }
+
         h1 {
             font-size: 2rem;
             margin-bottom: 10px;
             color: #4da3ff;
         }
+
         p {
             font-size: 1rem;
             line-height: 1.5;
             margin-bottom: 20px;
         }
+
         .reason {
             background: rgba(255, 255, 255, 0.1);
             padding: 10px;
@@ -57,6 +72,7 @@ $mail_link = "mailto:support@bedmine.de?subject=Zugriff%20gesperrt&body=" . $mai
             color: #ff6b6b;
             margin-bottom: 20px;
         }
+
         a.button {
             display: inline-block;
             padding: 12px 25px;
@@ -67,9 +83,11 @@ $mail_link = "mailto:support@bedmine.de?subject=Zugriff%20gesperrt&body=" . $mai
             font-weight: bold;
             transition: background 0.3s ease;
         }
+
         a.button:hover {
             background: #1d75cc;
         }
+
         footer {
             font-size: 0.8rem;
             margin-top: 15px;
@@ -78,6 +96,7 @@ $mail_link = "mailto:support@bedmine.de?subject=Zugriff%20gesperrt&body=" . $mai
     </style>
 </head>
 <body>
+    <canvas id="particle-canvas"></canvas>
     <div class="container">
         <h1>🚫 Zugriff Gesperrt</h1>
         <p>Der Zugriff auf diese Website wurde von <strong>xHost</strong> blockiert.</p>
@@ -90,5 +109,82 @@ $mail_link = "mailto:support@bedmine.de?subject=Zugriff%20gesperrt&body=" . $mai
             &copy; <?php echo date('Y'); ?> xʜᴏꜱᴛ ꜱᴛᴜᴅɪᴏꜱ
         </footer>
     </div>
+
+    <script>
+    (() => {
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        const particles = [];
+        const particleCount = 80;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * devicePixelRatio;
+            canvas.height = height * devicePixelRatio;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+        }
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = 1 + Math.random() * 2;
+                this.speedX = (Math.random() - 0.5) * 0.15;
+                this.speedY = (Math.random() - 0.5) * 0.15;
+                this.opacity = 0.1 + Math.random() * 0.3;
+                this.color = `rgba(77, 163, 255, ${this.opacity})`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if(this.x < 0) this.x = width;
+                else if(this.x > width) this.x = 0;
+                if(this.y < 0) this.y = height;
+                else if(this.y > height) this.y = 0;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = 'rgba(77,163,255,0.8)';
+                ctx.shadowBlur = 4;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            for(let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            resize();
+        });
+
+        resize();
+        init();
+        animate();
+    })();
+    </script>
 </body>
 </html>
